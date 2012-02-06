@@ -1,0 +1,78 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<rss version="2.0">
+        <channel>
+          <title>The IODA Engineering Blog</title>
+          <link>http://tech.iodalliance.com</link>
+          <description>IODA Engineering</description>
+          <pubDate>Mon, 6 Feb 2012 14:17:11 -0800</pubDate>
+          <lastBuildDate>Mon, 6 Feb 2012 14:17:11 -0800</lastBuildDate>
+          <generator>Scalate - http://scalate.fusesource.org/</generator>
+          <item>
+              <title>Using Scalate as a Static Blog Generator</title>
+              <link>http://tech.iodalliance.composts/using_scalate_as_a_static_blog_generator.html</link>
+              <description>&lt;p&gt;Static blog generators such as &lt;a href=&quot;http://jekyllrb.com/&quot;&gt;Jekyll&lt;/a&gt; are rapidly increasing in popularity of late, and with good reason. Scaling is trivial (any CDN will do), security concerns are negligible relative to dynamic blogging platforms like Wordpress, developers can use the tools they're accustomed to for editing and source control, and combined with a javascript-based commenting system like Disqus the user experience is identical to traditional blogging systems. Most of the popular options are written in python or ruby, and even though the backend language is basically irrelevant for a static site generator, I wanted to find a scala-based solution out of curiosity. Thankfully, &lt;a href=&quot;http://scalate.fusesource.org&quot;&gt;Scalate&lt;/a&gt; (a templating system for Scala) includes a static site generator that proved easily adaptable for this use.&lt;/p&gt;
+
+&lt;p&gt;First of all, install Scalate using the instructions &lt;a href=&quot;http://scalate.fusesource.org/documentation/installing.html&quot;&gt;on their site&lt;/a&gt;, then create an empty site &lt;a href=&quot;http://scalate.fusesource.org/documentation/siteGen.html&quot;&gt;with the sitegen tool&lt;/a&gt;. While this gives you a shell site that be rendered statically via &lt;code&gt;mvn install&lt;/code&gt;, it's missing some features that are useful for a blog such as a way to group posts by month as you see in the right-hand nav (there is a BlogHelper class included with Scalate, but it's quite minimal). You can put Scala files in &lt;code&gt;ext/&lt;/code&gt; that will be available for import in your templates; I made one called Util.scala to hold various helper functions:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Gist to go here&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A few general points:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;src/WEB-INF/scalate/layouts/default.scaml&lt;/code&gt; gets wrapped around all pages by default. The content of the page is inserted in place of &lt;code&gt;!~~ body&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Because of the way the Util class works, you have to use the .page format for posts. The top of the posts should look like&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;---
+title: Using Scalate as a Static Blog Generator
+author: Ramesh Sen
+
+
+--- name:content pipeline:markdown&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;You can create a &lt;code&gt;src/index.rss.feed&lt;/code&gt; that looks like&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;---
+link: http://tech.iodalliance.com
+author: &quot;IODA Engineering&quot;
+title: &quot;The IODA Engineering Blog&quot;
+description: &quot;IODA Engineering&quot;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Put it in the header of your default.scaml with&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;%link(href={uri(&quot;/index.rss&quot;)} rel=&quot;alternate&quot; title={title} type=&quot;application/rss+xml&quot;)&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;to setup an RSS feed.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;While working on a post or editing templates, you can use &lt;code&gt;mvn jetty:run&lt;/code&gt; to render the site dynamically on http://localhost:8080.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;To be able to deploy the generated site via &lt;code&gt;mvn scalate:deploy&lt;/code&gt; I had to make several changes to the &lt;code&gt;pom.xml&lt;/code&gt; (NOTE: this needs to change to reflect Github deployment):&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;If you want to deploy using DAV, add jackrabbit as a build extension by placing&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;extensions&amp;gt;
+  &amp;lt;extension&amp;gt;
+    &amp;lt;groupId&amp;gt;org.apache.maven.wagon&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;wagon-webdav-jackrabbit&amp;lt;/artifactId&amp;gt;
+    &amp;lt;version&amp;gt;1.0&amp;lt;/version&amp;gt;
+  &amp;lt;/extension&amp;gt;
+&amp;lt;/extensions&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;under &lt;code&gt;&amp;lt;build&amp;gt;&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Add a &lt;code&gt;&amp;lt;configuration&amp;gt;&lt;/code&gt; section with &lt;code&gt;&amp;lt;remoteServerId&amp;gt;&lt;/code&gt; and &lt;code&gt;&amp;lt;remoteServerUrl&amp;gt;&lt;/code&gt; to the &lt;code&gt;&amp;lt;plugin&amp;gt;&lt;/code&gt; section for &lt;code&gt;maven-scalate-plugin&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Add a distributionManagement section at the top level:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;distributionManagement&amp;gt;
+  &amp;lt;site&amp;gt;
+    &amp;lt;id&amp;gt;remoteServerId&amp;lt;/id&amp;gt;
+    &amp;lt;name&amp;gt;Site Name&amp;lt;/name&amp;gt;
+    &amp;lt;url&amp;gt;remoteServerUrl&amp;lt;/url&amp;gt;
+  &amp;lt;/site&amp;gt;
+&amp;lt;/distributionManagement&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;TODO: add Disqus&lt;/p&gt;
+
+&lt;p&gt;That's about it as far as Scalate-specific configuration goes. You'll obviously want to add your own CSS and do any other customizations you want, but these instructions will give you a basic working statically-generated blog site.&lt;/p&gt;</description>
+            </item>
+        </channel>
+      </rss>

@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML Basic 1.1//EN" "http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd"> 
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="description" content="IODA Engineering Blog"/>
+    <meta name="keywords" content="scala,perl,php,mongo,mysql,solr"/>
+    <meta name="author" content="IODA Engineering"/>
+    <link href="http://www.iodalliance.com/css/application.css" rel="stylesheet" type="text/css"/>
+    <link href="css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="css/pygmentize.css" rel="stylesheet" type="text/css"/>
+    <link href="index.rss" rel="alternate" title="IODA Engineering Blog" type="application/rss+xml"/>
+    <script src="highlight/highlight.js" type="text/javascript"></script>
+    <script src="highlight/languages/java.js" type="text/javascript"></script>
+    <script src="highlight/languages/scala.js" type="text/javascript"></script>
+    <link href="highlight/styles/default.css" rel="stylesheet" type="text/css"/>
+    <script type='text/javascript'>
+      //<![CDATA[
+        hljs.initHighlightingOnLoad();
+      //]]>
+    </script>
+    <title>
+      IODA Engineering Blog
+    </title>
+
+    
+  </head>
+  <body>
+    <div id="header-IODA">
+      <div id="header-IODA-inside">
+        <div class="iodaLogo">
+          <a href="index.html">
+            <img src="http://www.iodalliance.com/img/v2/ioda-logo-sm.gif" width="173" height="115"/>
+          </a>
+        </div>
+        <div id="header-IODA-blog">
+          <h1>Engineering Blog</h1>
+        </div>
+      </div>
+    </div>
+    <div id="content-IODA-950">
+      <div id="content-IODA-66-33-across">
+        <div class="content-IODA-66-33-first">
+<div class="post">
+  <a href="posts/using_scalate_as_a_static_blog_generator.html">
+    <h2>Using Scalate as a Static Blog Generator</h2>
+  </a>
+  <h6>Posted by Ramesh Sen on Tuesday, January 31, 2012</h6>
+<p>Static blog generators such as <a href="http://jekyllrb.com/">Jekyll</a> are rapidly increasing in popularity of late, and with good reason. Scaling is trivial (any CDN will do), security concerns are negligible relative to dynamic blogging platforms like Wordpress, developers can use the tools they're accustomed to for editing and source control, and combined with a javascript-based commenting system like Disqus the user experience is identical to traditional blogging systems. Most of the popular options are written in python or ruby, and even though the backend language is basically irrelevant for a static site generator, I wanted to find a scala-based solution out of curiosity. Thankfully, <a href="http://scalate.fusesource.org">Scalate</a> (a templating system for Scala) includes a static site generator that proved easily adaptable for this use.</p>
+
+<p>First of all, install Scalate using the instructions <a href="http://scalate.fusesource.org/documentation/installing.html">on their site</a>, then create an empty site <a href="http://scalate.fusesource.org/documentation/siteGen.html">with the sitegen tool</a>. While this gives you a shell site that be rendered statically via <code>mvn install</code>, it's missing some features that are useful for a blog such as a way to group posts by month as you see in the right-hand nav (there is a BlogHelper class included with Scalate, but it's quite minimal). You can put Scala files in <code>ext/</code> that will be available for import in your templates; I made one called Util.scala to hold various helper functions:</p>
+
+<pre><code>Gist to go here</code></pre>
+
+<p>A few general points:</p>
+
+<ul>
+<li><code>src/WEB-INF/scalate/layouts/default.scaml</code> gets wrapped around all pages by default. The content of the page is inserted in place of <code>!~~ body</code>.</li>
+<li><p>Because of the way the Util class works, you have to use the .page format for posts. The top of the posts should look like</p>
+
+<pre><code>---
+title: Using Scalate as a Static Blog Generator
+author: Ramesh Sen
+
+
+--- name:content pipeline:markdown</code></pre></li>
+<li><p>You can create a <code>src/index.rss.feed</code> that looks like</p>
+
+<pre><code>---
+link: http://tech.iodalliance.com
+author: "IODA Engineering"
+title: "The IODA Engineering Blog"
+description: "IODA Engineering"</code></pre>
+
+<p>Put it in the header of your default.scaml with</p>
+
+<pre><code>%link(href={uri("/index.rss")} rel="alternate" title={title} type="application/rss+xml")</code></pre>
+
+<p>to setup an RSS feed.</p></li>
+<li>While working on a post or editing templates, you can use <code>mvn jetty:run</code> to render the site dynamically on http://localhost:8080.</li>
+</ul>
+
+<p>To be able to deploy the generated site via <code>mvn scalate:deploy</code> I had to make several changes to the <code>pom.xml</code> (NOTE: this needs to change to reflect Github deployment):</p>
+
+<ul>
+<li><p>If you want to deploy using DAV, add jackrabbit as a build extension by placing</p>
+
+<pre><code>&lt;extensions&gt;
+  &lt;extension&gt;
+    &lt;groupId&gt;org.apache.maven.wagon&lt;/groupId&gt;
+    &lt;artifactId&gt;wagon-webdav-jackrabbit&lt;/artifactId&gt;
+    &lt;version&gt;1.0&lt;/version&gt;
+  &lt;/extension&gt;
+&lt;/extensions&gt;</code></pre>
+
+<p>under <code>&lt;build&gt;</code></p></li>
+<li><p>Add a <code>&lt;configuration&gt;</code> section with <code>&lt;remoteServerId&gt;</code> and <code>&lt;remoteServerUrl&gt;</code> to the <code>&lt;plugin&gt;</code> section for <code>maven-scalate-plugin</code></p></li>
+<li><p>Add a distributionManagement section at the top level:</p>
+
+<pre><code>&lt;distributionManagement&gt;
+  &lt;site&gt;
+    &lt;id&gt;remoteServerId&lt;/id&gt;
+    &lt;name&gt;Site Name&lt;/name&gt;
+    &lt;url&gt;remoteServerUrl&lt;/url&gt;
+  &lt;/site&gt;
+&lt;/distributionManagement&gt;</code></pre></li>
+</ul>
+
+<p>TODO: add Disqus</p>
+
+<p>That's about it as far as Scalate-specific configuration goes. You'll obviously want to add your own CSS and do any other customizations you want, but these instructions will give you a basic working statically-generated blog site.</p>
+</div>
+<hr/>
+
+          
+        </div>
+        <div class="content-IODA-66-33-second">
+          <h4>About</h4>
+          Thoughts and musings from IODA's engineering team on topics including Scala, MongoDB, perl, PHP, and MySQL
+          <p></p>
+          <h4>Older Posts</h4>
+          <h5>January 2012</h5>
+          <div class="post">
+            <a href="posts/using_scalate_as_a_static_blog_generator.html">
+              <h6>Using Scalate as a Static Blog Generator</h6>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="footer">
+      <div class="wrapper">
+
+        
+      </div>
+    </div>
+  </body>
+</html>
