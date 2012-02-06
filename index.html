@@ -44,12 +44,10 @@
   <a href="posts/using_scalate_as_a_static_blog_generator.html">
     <h2>Using Scalate as a Static Blog Generator</h2>
   </a>
-  <h6>Posted by Ramesh Sen on Tuesday, January 31, 2012</h6>
+  <h6>Posted by Ramesh Sen on Monday, February 6, 2012</h6>
 <p>Static blog generators such as <a href="http://jekyllrb.com/">Jekyll</a> are rapidly increasing in popularity of late, and with good reason. Scaling is trivial (any CDN will do), security concerns are negligible relative to dynamic blogging platforms like Wordpress, developers can use the tools they're accustomed to for editing and source control, and combined with a javascript-based commenting system like Disqus the user experience is identical to traditional blogging systems. Most of the popular options are written in python or ruby, and even though the backend language is basically irrelevant for a static site generator, I wanted to find a scala-based solution out of curiosity. Thankfully, <a href="http://scalate.fusesource.org">Scalate</a> (a templating system for Scala) includes a static site generator that proved easily adaptable for this use.</p>
 
-<p>First of all, install Scalate using the instructions <a href="http://scalate.fusesource.org/documentation/installing.html">on their site</a>, then create an empty site <a href="http://scalate.fusesource.org/documentation/siteGen.html">with the sitegen tool</a>. While this gives you a shell site that be rendered statically via <code>mvn install</code>, it's missing some features that are useful for a blog such as a way to group posts by month as you see in the right-hand nav (there is a BlogHelper class included with Scalate, but it's quite minimal). You can put Scala files in <code>ext/</code> that will be available for import in your templates; I made one called Util.scala to hold various helper functions:</p>
-
-<pre><code>Gist to go here</code></pre>
+<p>First of all, install Scalate using the instructions <a href="http://scalate.fusesource.org/documentation/installing.html">on their site</a>, then create an empty site <a href="http://scalate.fusesource.org/documentation/siteGen.html">with the sitegen tool</a>. While this gives you a shell site that be rendered statically via <code>mvn install</code>, it's missing some features that are useful for a blog such as a way to group posts by month as you see in the right-hand nav (there is a BlogHelper class included with Scalate, but it's quite minimal). You can put Scala files in <code>ext/</code> that will be available for import in your templates; I made one called <a href="https://github.com/iodaeng/ioda-tech-blog/blob/master/ext/Util.scala">Util.scala</a> to hold various helper functions.</p>
 
 <p>A few general points:</p>
 
@@ -62,7 +60,9 @@ title: Using Scalate as a Static Blog Generator
 author: Ramesh Sen
 
 
---- name:content pipeline:markdown</code></pre></li>
+--- name:content pipeline:markdown</code></pre>
+
+<p>You can also add a <code>created_at</code> header if you need to adjust the date, and you can use different pipelines (Scaml, Jade, SSP) for the template.</p></li>
 <li><p>You can create a <code>src/index.rss.feed</code> that looks like</p>
 
 <pre><code>---
@@ -79,35 +79,12 @@ description: "IODA Engineering"</code></pre>
 <li>While working on a post or editing templates, you can use <code>mvn jetty:run</code> to render the site dynamically on http://localhost:8080.</li>
 </ul>
 
-<p>To be able to deploy the generated site via <code>mvn scalate:deploy</code> I had to make several changes to the <code>pom.xml</code> (NOTE: this needs to change to reflect Github deployment):</p>
-
-<ul>
-<li><p>If you want to deploy using DAV, add jackrabbit as a build extension by placing</p>
-
-<pre><code>&lt;extensions&gt;
-  &lt;extension&gt;
-    &lt;groupId&gt;org.apache.maven.wagon&lt;/groupId&gt;
-    &lt;artifactId&gt;wagon-webdav-jackrabbit&lt;/artifactId&gt;
-    &lt;version&gt;1.0&lt;/version&gt;
-  &lt;/extension&gt;
-&lt;/extensions&gt;</code></pre>
-
-<p>under <code>&lt;build&gt;</code></p></li>
-<li><p>Add a <code>&lt;configuration&gt;</code> section with <code>&lt;remoteServerId&gt;</code> and <code>&lt;remoteServerUrl&gt;</code> to the <code>&lt;plugin&gt;</code> section for <code>maven-scalate-plugin</code></p></li>
-<li><p>Add a distributionManagement section at the top level:</p>
-
-<pre><code>&lt;distributionManagement&gt;
-  &lt;site&gt;
-    &lt;id&gt;remoteServerId&lt;/id&gt;
-    &lt;name&gt;Site Name&lt;/name&gt;
-    &lt;url&gt;remoteServerUrl&lt;/url&gt;
-  &lt;/site&gt;
-&lt;/distributionManagement&gt;</code></pre></li>
-</ul>
-
-<p>TODO: add Disqus</p>
+<p>Even though Maven supports deploying to a git repository, I haven't been able to make it work with Scalate's customized deployment task. Fortunately, this is reasonably easy to work around with a few shell scripts. <a href="https://github.com/iodaeng/ioda-tech-blog/blob/master/generate.sh">generate.sh</a> clones the target repository (typically this will be called <em>username</em>.github.com) into <code>target/sitegen</code> and builds the site, while <a href="https://github.com/iodaeng/ioda-tech-blog/blob/master/publish.sh">publish.sh</a> does the add/commit/push. </p>
 
 <p>That's about it as far as Scalate-specific configuration goes. You'll obviously want to add your own CSS and do any other customizations you want, but these instructions will give you a basic working statically-generated blog site.</p>
+  <a href="posts/using_scalate_as_a_static_blog_generator.html#disqus_thread">
+    <Comments></Comments>
+  </a>
 </div>
 <hr/>
 
@@ -118,7 +95,7 @@ description: "IODA Engineering"</code></pre>
           Thoughts and musings from IODA's engineering team on topics including Scala, MongoDB, perl, PHP, and MySQL
           <p></p>
           <h4>Older Posts</h4>
-          <h5>January 2012</h5>
+          <h5>February 2012</h5>
           <div class="post">
             <a href="posts/using_scalate_as_a_static_blog_generator.html">
               <h6>Using Scalate as a Static Blog Generator</h6>
@@ -133,5 +110,17 @@ description: "IODA Engineering"</code></pre>
         
       </div>
     </div>
+    <script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'iodaeng'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+    var s = document.createElement('script'); s.async = true;
+    s.type = 'text/javascript';
+    s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
   </body>
 </html>
