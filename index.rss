@@ -4,8 +4,8 @@
           <title>The IODA Engineering Blog</title>
           <link>http://tech.iodalliance.com</link>
           <description>IODA Engineering</description>
-          <pubDate>Mon, 6 Feb 2012 15:44:51 -0800</pubDate>
-          <lastBuildDate>Mon, 6 Feb 2012 15:44:51 -0800</lastBuildDate>
+          <pubDate>Mon, 6 Feb 2012 17:42:18 -0800</pubDate>
+          <lastBuildDate>Mon, 6 Feb 2012 17:42:18 -0800</lastBuildDate>
           <generator>Scalate - http://scalate.fusesource.org/</generator>
           <item>
               <title>Using Scalate as a Static Blog Generator</title>
@@ -23,11 +23,12 @@
 &lt;pre&gt;&lt;code&gt;---
 title: Using Scalate as a Static Blog Generator
 author: Ramesh Sen
+created_at: 2012-02-06 15:44:00 PST
 
 
 --- name:content pipeline:markdown&lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;You can also add a &lt;code&gt;created_at&lt;/code&gt; header if you need to adjust the date, and you can use different pipelines (Scaml, Jade, SSP) for the template.&lt;/p&gt;&lt;/li&gt;
+&lt;p&gt;If you leave out any of the headers, you'll get empty values for the title and author, and the last &lt;em&gt;modified&lt;/em&gt; time for the created_at field. You can also use different pipelines (Scaml, Jade, SSP) for the template.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;You can create a &lt;code&gt;src/index.rss.feed&lt;/code&gt; that looks like&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;---
